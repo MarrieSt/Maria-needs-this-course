@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Why Maria needs this course</title>
+  <meta name="description" content="A tiny site that tailors a persuasive explanation for why Maria should take the Columbia x Wall Street Prep AI Certification for Finance." />
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #121833;
+      --muted: #94a3b8;
+      --text: #e6e9f2;
+      --brand: #6ee7b7;
+      --brand-2: #60a5fa;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 10% 10%, #111633, var(--bg)), linear-gradient(180deg, #0b1020, #0b1020);
+      color: var(--text);
+      display: grid; place-items: center;
+    }
+    .shell { width: min(960px, 92vw); }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px; padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,.4);
+      backdrop-filter: blur(6px);
+    }
+    h1 { font-size: clamp(28px, 5vw, 40px); margin: 0 0 12px; letter-spacing: .2px; }
+    p.lead { color: var(--muted); margin-top: 0; }
+
+    .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 18px; }
+    select, button {
+      border-radius: 12px; border: 1px solid rgba(255,255,255,.14);
+      background: #0e1533; color: var(--text);
+      padding: 12px 14px; font-size: 16px; outline: none; transition: .2s ease;
+    }
+    select { min-width: 180px; }
+    button { cursor: pointer; background: linear-gradient(90deg, var(--brand), var(--brand-2)); color: #0b1020; border: none; font-weight: 700; }
+    button:hover { filter: brightness(1.05); transform: translateY(-1px); }
+
+    .fine { color: var(--muted); font-size: 12px; margin-top: 10px; }
+
+    dialog::backdrop { background: rgba(4,7,15,.6); backdrop-filter: blur(3px); }
+    dialog {
+      border: 1px solid rgba(255,255,255,.1); border-radius: 18px; padding: 0; overflow: hidden;
+      background: #0f1535; color: var(--text); width: min(820px, 92vw);
+      box-shadow: 0 30px 80px rgba(0,0,0,.5);
+      animation: pop .2s ease-out;
+    }
+    @keyframes pop { from { transform: translateY(8px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+
+    .dlg-head { padding: 20px 22px; border-bottom: 1px solid rgba(255,255,255,.08); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)); }
+    .dlg-body { padding: 20px 22px; }
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 16px; }
+    .chip { font-size: 12px; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.12); color: var(--muted) }
+    .list { display: grid; gap: 10px; margin: 12px 0 0; }
+    .list > div { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 12px 14px; }
+    .muted { color: var(--muted); }
+
+    .dlg-actions { display: flex; justify-content: space-between; gap: 8px; padding: 16px 22px; border-top: 1px solid rgba(255,255,255,.08); }
+    .ghost { background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,.18); }
+
+    a { color: var(--brand-2); }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="card">
+      <h1>Why Maria needs this course</h1>
+      <p class="lead">Pick your name to see a personalised case for sponsoring Maria's <em>AI Certification for Finance</em> (Columbia x Wall Street Prep).</p>
+      <div class="row">
+        <label for="who" class="muted">I am</label>
+        <select id="who" aria-label="Select your name">
+          <option value="" selected disabled>Select: Ed / Tam / Nick</option>
+          <option>Ed</option>
+          <option>Tam</option>
+          <option>Nick</option>
+        </select>
+        <button id="openBtn" type="button" disabled>Show why</button>
+      </div>
+      <div class="fine">Tip: Refresh the page to generate a new variant of the explanation.</div>
+    </section>
+
+    <dialog id="whyDlg" aria-labelledby="dlgTitle">
+      <div class="dlg-head">
+        <div>
+          <div id="dlgKicker" class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.12em"></div>
+          <h2 id="dlgTitle" style="margin:6px 0 0;font-size:22px"></h2>
+        </div>
+        <button id="closeBtn" class="ghost" style="padding:8px 10px;border-radius:10px">Close</button>
+      </div>
+      <div class="dlg-body">
+        <p id="greeting" style="margin-top:0"></p>
+        <div class="chips" id="chips"></div>
+        <div class="list" id="reasons"></div>
+        <p class="muted" style="margin-top:16px">Course: <a href="https://wallstreetprep.business.columbia.edu/ai-certification/" target="_blank" rel="noopener">Columbia x Wall Street Prep — AI Certification for Finance</a></p>
+      </div>
+      <div class="dlg-actions">
+        <button id="regenBtn" class="ghost">Regenerate</button>
+        <button id="copyBtn">Copy summary</button>
+      </div>
+    </dialog>
+  </main>
+
+  <script>
+    // --- tiny utilities ---
+    const $ = sel => document.querySelector(sel);
+    const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    const fmt = (n) => new Intl.NumberFormat('en-GB', { maximumFractionDigits: 0 }).format(n);
+
+    // Personas and content buckets
+    const personas = {
+      Ed: {
+        pronoun: 'he',
+        role: "Maria's line manager",
+        cares: ['career growth', 'capability building', 'talent retention'],
+        greeting: name => `Hi ${name}, as Maria\'s manager you\'re always looking for high‑leverage development moves. Here\'s why this one pays back.`,
+      },
+      Tam: {
+        pronoun: 'she',
+        role: 'COO',
+        cares: ['operational excellence', 'risk reduction', 'throughput'],
+        greeting: name => `Hi ${name}, from an ops lens this is a practical uplift to accuracy, speed and control across our clearing workflows.`,
+      },
+      Nick: {
+        pronoun: 'he',
+        role: 'Head of the business',
+        cares: ['commercial outcomes', 'strategic advantage', 'modernisation'],
+        greeting: name => `Hi ${name}, this is a small bet with asymmetric upside for Listed Rates & IRS clearing performance.`,
+      }
+    };
+
+    // Content fragments tailored to clearing in Listed Rates & IRS
+    const buildingBlocks = {
+      Ed: [
+        () => `Maria formalises AI-for-finance methods (prompt engineering, data cleaning, RAG, model risk basics) and brings them into our playbooks for analysts and PMs`,
+        () => `She can mentor the team to automate recurring desk tasks (MI refreshes, reconciliations, static data checks), freeing ~${fmt(40 + Math.random()*60)} hours per quarter`,
+        () => `We reduce context-switch toil by building a small, safe internal toolkit (Python notebooks + policy-compliant copilots) that Maria can champion`,
+        () => `Clearer career pathway: visible impact project → internal brown-bag sessions → cross-desk enablement` ,
+      ],
+      Tam: [
+        () => `Targeted automation for blotter hygiene, exception triage and break classification; fewer manual touchpoints across the day`,
+        () => `Quality uplift: consistent documentation and audit trails generated alongside workflows`,
+        () => `Operational risk: codifies human-in-the-loop checks; ${rand(['reduces keystroke errors','tightens maker-checker discipline','shortens time-to-detect for anomalies'])}`,
+        () => `Run-rate saving potential of £${fmt(30000 + Math.random()*20000)} annually if we scale 3–4 automations desk-wide`,
+      ],
+      Nick: [
+        () => `Commercial upside: faster pricing/hedging prep and cleaner MI → sharper decisions in a tight-margin market`,
+        () => `Client trust: better SLAs on queries and breaks; we look like a modern shop`,
+        () => `Cost/benefit: one-off $4,800 (~£${fmt(3800 + Math.random()*400)}) vs. potential efficiency gains worth £${fmt(60000 + Math.random()*40000)}+ in year one`,
+        () => `Future-proofing: builds in-house literacy so we buy tools smartly, not blindly`,
+      ]
+    };
+
+    const crossCutting = [
+      () => `Applies specifically to our domain: Listed rates & IRS clearing — not generic tech theatre`,
+      () => `Outputs include a live mini‑portfolio of automations with measurable KPIs`,
+      () => `Maria will produce a short internal write‑up and lunch‑and‑learn within 30 days of completion`,
+      () => `Compliance aware: focus on secure, on‑prem data handling and model risk guardrails`,
+    ];
+
+    function makeSummary(name){
+      const p = personas[name];
+      const head = `${rand(['Let\'s fund this.','Back the doer.','Small cost, big lift.','Green light from me.'])}`;
+      const greet = p.greeting(name);
+
+      // assemble chips & reasons
+      const chips = [p.role, ...p.cares.slice(0,2), 'Listed Rates & IRS'].slice(0,4);
+      const reasons = [
+        ...shuffle(buildingBlocks[name]).slice(0,3).map(f => f()),
+        rand(crossCutting)(),
+      ];
+
+      // a tiny ROI blurb
+      const hoursSaved = Math.floor(120 + Math.random()*160); // yearly
+      const rate = 85; // blended £/hr assumption
+      const benefit = hoursSaved * rate;
+      const roi = Math.round((benefit - 3800) / 3800 * 100);
+
+      const roiLine = `Back‑of‑envelope ROI: ~${fmt(hoursSaved)} hours saved/year ≈ £${fmt(benefit)} in capacity. Course cost ~£3.8k ⇒ ~${roi}% ROI in year one.`;
+
+      return { head, greet, chips, reasons: [...reasons, roiLine] };
+    }
+
+    function shuffle(arr){
+      return arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+    }
+
+    function render(summary){
+      $('#dlgKicker').textContent = summary.head;
+      $('#greeting').textContent = summary.greet;
+
+      const chipsEl = $('#chips');
+      chipsEl.innerHTML = '';
+      summary.chips.forEach(c => {
+        const span = document.createElement('span');
+        span.className = 'chip'; span.textContent = c; chipsEl.appendChild(span);
+      });
+
+      const list = $('#reasons');
+      list.innerHTML='';
+      summary.reasons.forEach(text => {
+        const div = document.createElement('div');
+        div.textContent = text; list.appendChild(div);
+      });
+    }
+
+    function openFor(name){
+      const s = makeSummary(name);
+      $('#dlgTitle').textContent = `For ${name}`;
+      render(s);
+      $('#whyDlg').showModal();
+    }
+
+    // wiring
+    const sel = $('#who');
+    const openBtn = $('#openBtn');
+    sel.addEventListener('change', () => {
+      openBtn.disabled = !sel.value;
+    });
+    openBtn.addEventListener('click', () => openFor(sel.value));
+    $('#closeBtn').addEventListener('click', () => $('#whyDlg').close());
+    $('#regenBtn').addEventListener('click', () => render(makeSummary($('#who').value)));
+
+    // bonus: allow Enter to open
+    sel.addEventListener('keydown', e => { if(e.key==='Enter' && sel.value) openFor(sel.value); });
+
+    // copy summary to clipboard
+    $('#copyBtn').addEventListener('click', async () => {
+      const items = Array.from(document.querySelectorAll('#reasons > div')).map(d=>`• ${d.textContent}`);
+      const text = `${$('#dlgTitle').textContent}\n\n${$('#greeting').textContent}\n\n${items.join('\n')}`;
+      try { await navigator.clipboard.writeText(text); openBtn.textContent = 'Copied!'; setTimeout(()=>openBtn.textContent='Show why', 1200); } catch(e) {}
+    });
+
+    // regeneration on reload is automatic because content is randomised on each makeSummary() call
+  </script>
+</body>
+</html>

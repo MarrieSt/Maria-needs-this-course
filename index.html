@@ -15,9 +15,9 @@
       --brand-2: #60a5fa;
     }
     * { box-sizing: border-box; }
-    html, body { height: 100%; }
+    html, body { height: 100%; margin: 0; }
     body {
-      margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
       background: radial-gradient(1200px 800px at 10% 10%, #111633, var(--bg)), linear-gradient(180deg, #0b1020, #0b1020);
       color: var(--text);
       display: grid; place-items: center;
@@ -31,7 +31,6 @@
     }
     h1 { font-size: clamp(28px, 5vw, 40px); margin: 0 0 12px; letter-spacing: .2px; }
     p.lead { color: var(--muted); margin-top: 0; }
-
     .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 18px; }
     select, button {
       border-radius: 12px; border: 1px solid rgba(255,255,255,.14);
@@ -41,29 +40,30 @@
     select { min-width: 180px; }
     button { cursor: pointer; background: linear-gradient(90deg, var(--brand), var(--brand-2)); color: #0b1020; border: none; font-weight: 700; }
     button:hover { filter: brightness(1.05); transform: translateY(-1px); }
-
     .fine { color: var(--muted); font-size: 12px; margin-top: 10px; }
 
-    dialog::backdrop { background: rgba(4,7,15,.6); backdrop-filter: blur(3px); }
+    /* Native dialog fix: hidden by default, only flex when [open] */
     dialog {
       border: 1px solid rgba(255,255,255,.1); border-radius: 18px; padding: 0; overflow: hidden;
       background: #0f1535; color: var(--text); width: min(820px, 92vw);
       box-shadow: 0 30px 80px rgba(0,0,0,.5);
       animation: pop .2s ease-out;
+      max-height: 90vh; /* mobile-friendly */
+      display: none; /* key: don't force open on load */
     }
-    @keyframes pop { from { transform: translateY(8px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+    dialog[open] { display: flex; flex-direction: column; }
+    dialog::backdrop { background: rgba(4,7,15,.6); backdrop-filter: blur(3px); }
 
-    .dlg-head { padding: 20px 22px; border-bottom: 1px solid rgba(255,255,255,.08); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)); }
-    .dlg-body { padding: 20px 22px; }
+    @keyframes pop { from { transform: translateY(8px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+    .dlg-head { flex-shrink: 0; padding: 20px 22px; border-bottom: 1px solid rgba(255,255,255,.08); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)); }
+    .dlg-body { padding: 20px 22px; overflow-y: auto; }
     .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0 16px; }
     .chip { font-size: 12px; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.12); color: var(--muted) }
     .list { display: grid; gap: 10px; margin: 12px 0 0; }
     .list > div { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 12px 14px; }
     .muted { color: var(--muted); }
-
-    .dlg-actions { display: flex; justify-content: space-between; gap: 8px; padding: 16px 22px; border-top: 1px solid rgba(255,255,255,.08); }
+    .dlg-actions { flex-shrink: 0; display: flex; justify-content: space-between; gap: 8px; padding: 16px 22px; border-top: 1px solid rgba(255,255,255,.08); }
     .ghost { background: transparent; color: var(--text); border: 1px solid rgba(255,255,255,.18); }
-
     a { color: var(--brand-2); }
   </style>
 </head>
@@ -97,7 +97,9 @@
         <p id="greeting" style="margin-top:0"></p>
         <div class="chips" id="chips"></div>
         <div class="list" id="reasons"></div>
-        <p class="muted" style="margin-top:16px">Course: <a href="https://wallstreetprep.business.columbia.edu/ai-certification/" target="_blank" rel="noopener">Columbia x Wall Street Prep — AI Certification for Finance</a></p>
+        <p class="muted" style="margin-top:16px">
+          Course: <a href="https://wallstreetprep.business.columbia.edu/ai-certification/" target="_blank" rel="noopener">Columbia x Wall Street Prep — AI Certification for Finance</a>
+        </p>
         <p class="muted" style="margin-top:8px">Oh and because this website was built with ChatGPT 5 in ~12 seconds</p>
       </div>
       <div class="dlg-actions">
@@ -108,18 +110,16 @@
   </main>
 
   <script>
-    // --- tiny utilities ---
     const $ = sel => document.querySelector(sel);
     const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
     const fmt = (n) => new Intl.NumberFormat('en-GB', { maximumFractionDigits: 0 }).format(n);
 
-    // Personas and content buckets
     const personas = {
       Ed: {
         pronoun: 'he',
         role: "Maria's line manager",
         cares: ['career growth', 'capability building', 'talent retention'],
-        greeting: name => `Hi ${name}, as Maria\'s manager you\'re always looking for high‑leverage development moves. Here\'s why this one pays back.`,
+        greeting: name => `Hi ${name}, as Maria's manager you're always looking for high‑leverage development moves. Here's why this one pays back.`,
       },
       Tam: {
         pronoun: 'she',
@@ -135,13 +135,12 @@
       }
     };
 
-    // Content fragments tailored to clearing in Listed Rates & IRS
     const buildingBlocks = {
       Ed: [
         () => `Maria formalises AI-for-finance methods (prompt engineering, data cleaning, RAG, model risk basics) and brings them into our playbooks for analysts and PMs`,
         () => `She can mentor the team to automate recurring desk tasks (MI refreshes, reconciliations, static data checks), freeing ~${fmt(40 + Math.random()*60)} hours per quarter`,
         () => `We reduce context-switch toil by building a small, safe internal toolkit (Python notebooks + policy-compliant copilots) that Maria can champion`,
-        () => `Clearer career pathway: visible impact project → internal brown-bag sessions → cross-desk enablement` ,
+        () => `Clearer career pathway: visible impact project → internal brown-bag sessions → cross-desk enablement`,
       ],
       Tam: [
         () => `Targeted automation for blotter hygiene, exception triage and break classification; fewer manual touchpoints across the day`,
@@ -150,7 +149,7 @@
         () => `Run-rate saving potential of £${fmt(30000 + Math.random()*20000)} annually if we scale 3–4 automations desk-wide`,
       ],
       Nick: [
-        () => `Commercial upside: faster pricing/hedging prep and cleaner MI → sharper decisions in a tight-margin market`,
+        () => `Commercial upside: faster pricing/hedging prep and cleaner MI → sharper decisions in a tight-margin market` ,
         () => `Client trust: better SLAs on queries and breaks; we look like a modern shop`,
         () => `Cost/benefit: one-off $4,800 (~£${fmt(3800 + Math.random()*400)}) vs. potential efficiency gains worth £${fmt(60000 + Math.random()*40000)}+ in year one`,
         () => `Future-proofing: builds in-house literacy so we buy tools smartly, not blindly`,
@@ -164,80 +163,65 @@
       () => `Compliance aware: focus on secure, on‑prem data handling and model risk guardrails`,
     ];
 
+    function shuffle(arr){
+      return arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+    }
+
     function makeSummary(name){
       const p = personas[name];
       const head = `${rand(['Let\'s fund this.','Back the doer.','Small cost, big lift.','Green light from me.'])}`;
       const greet = p.greeting(name);
-
-      // assemble chips & reasons
       const chips = [p.role, ...p.cares.slice(0,2), 'Listed Rates & IRS'].slice(0,4);
       const reasons = [
         ...shuffle(buildingBlocks[name]).slice(0,3).map(f => f()),
         rand(crossCutting)(),
       ];
-
-      // a tiny ROI blurb
-      const hoursSaved = Math.floor(120 + Math.random()*160); // yearly
-      const rate = 85; // blended £/hr assumption
+      const hoursSaved = Math.floor(120 + Math.random()*160);
+      const rate = 85;
       const benefit = hoursSaved * rate;
       const roi = Math.round((benefit - 3800) / 3800 * 100);
-
       const roiLine = `Back‑of‑envelope ROI: ~${fmt(hoursSaved)} hours saved/year ≈ £${fmt(benefit)} in capacity. Course cost ~£3.8k ⇒ ~${roi}% ROI in year one.`;
-
       return { head, greet, chips, reasons: [...reasons, roiLine] };
-    }
-
-    function shuffle(arr){
-      return arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
     }
 
     function render(summary){
       $('#dlgKicker').textContent = summary.head;
       $('#greeting').textContent = summary.greet;
-
       const chipsEl = $('#chips');
       chipsEl.innerHTML = '';
-      summary.chips.forEach(c => {
-        const span = document.createElement('span');
-        span.className = 'chip'; span.textContent = c; chipsEl.appendChild(span);
-      });
-
+      summary.chips.forEach(c => { const span = document.createElement('span'); span.className = 'chip'; span.textContent = c; chipsEl.appendChild(span); });
       const list = $('#reasons');
       list.innerHTML='';
-      summary.reasons.forEach(text => {
-        const div = document.createElement('div');
-        div.textContent = text; list.appendChild(div);
-      });
+      summary.reasons.forEach(text => { const div = document.createElement('div'); div.textContent = text; list.appendChild(div); });
     }
 
     function openFor(name){
       const s = makeSummary(name);
       $('#dlgTitle').textContent = `For ${name}`;
       render(s);
-      $('#whyDlg').showModal();
+      const dlg = $('#whyDlg');
+      if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open','');
     }
 
-    // wiring
     const sel = $('#who');
     const openBtn = $('#openBtn');
-    sel.addEventListener('change', () => {
-      openBtn.disabled = !sel.value;
-    });
+    sel.addEventListener('change', () => { openBtn.disabled = !sel.value; });
     openBtn.addEventListener('click', () => openFor(sel.value));
-    $('#closeBtn').addEventListener('click', () => $('#whyDlg').close());
-    $('#regenBtn').addEventListener('click', () => render(makeSummary($('#who').value)));
 
-    // bonus: allow Enter to open
+    const closeBtn = $('#closeBtn');
+    closeBtn.addEventListener('click', () => {
+      const dlg = $('#whyDlg');
+      if (dlg.close) dlg.close(); else dlg.removeAttribute('open');
+    });
+
+    $('#regenBtn').addEventListener('click', () => render(makeSummary($('#who').value)));
     sel.addEventListener('keydown', e => { if(e.key==='Enter' && sel.value) openFor(sel.value); });
 
-    // copy summary to clipboard
     $('#copyBtn').addEventListener('click', async () => {
       const items = Array.from(document.querySelectorAll('#reasons > div')).map(d=>`• ${d.textContent}`);
       const text = `${$('#dlgTitle').textContent}\n\n${$('#greeting').textContent}\n\n${items.join('\n')}`;
       try { await navigator.clipboard.writeText(text); openBtn.textContent = 'Copied!'; setTimeout(()=>openBtn.textContent='Show why', 1200); } catch(e) {}
     });
-
-    // regeneration on reload is automatic because content is randomised on each makeSummary() call
   </script>
 </body>
 </html>
